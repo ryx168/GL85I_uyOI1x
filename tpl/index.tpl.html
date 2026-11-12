@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>AI 日报 · 2026.11.06</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --bg: #0a1428;
+        --bg2: #101c38;
+        --panel: #172446;
+        --panel2: #1d2c55;
+        --fg: #f4f6fb;
+        --muted: #bcc5da;
+        --accent: #f5b400;
+        --accent2: #ffd24d;
+        --red: #ff4d4d;
+        --blue: #4ea1ff;
+        --ink: #0a1428;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1920px; height: 1080px; overflow: hidden;
+        background: var(--bg);
+        font-family: "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", "PingFang SC", "Segoe UI", sans-serif;
+        color: var(--fg);
+      }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+      .scene { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); opacity: 0; }
+      #s0 { opacity: 1; }
+
+      /* ---------- shared decoratives ---------- */
+      .glow { position: absolute; border-radius: 50%; filter: blur(60px); pointer-events: none; }
+      .grid {
+        position: absolute; inset: 0; pointer-events: none; opacity: 0.16;
+        background-image: linear-gradient(rgba(120,150,220,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(120,150,220,.35) 1px, transparent 1px);
+        background-size: 96px 96px;
+      }
+      .rays {
+        position: absolute; left: 50%; top: 50%; width: 3200px; height: 3200px; margin: -1600px 0 0 -1600px; pointer-events: none; opacity: 0.18;
+        background: repeating-conic-gradient(from 0deg, rgba(150,180,255,.28) 0deg 0.6deg, transparent 0.6deg 15deg);
+      }
+      .ghost { position: absolute; font-weight: 900; color: rgba(140,170,240,.07); letter-spacing: -0.02em; white-space: nowrap; pointer-events: none; }
+      .rule { position: absolute; height: 3px; background: var(--accent); transform-origin: left center; }
+      .meta { position: absolute; font-family: Consolas, "DejaVu Sans Mono", monospace; font-size: 20px; color: var(--muted); letter-spacing: 0.08em; }
+
+      .content { position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 150px 90px 300px 90px; display: flex; flex-direction: column; }
+      .kicker { font-size: 44px; font-weight: 700; color: var(--accent); letter-spacing: 0.02em; }
+      .h1 { font-size: 92px; font-weight: 900; line-height: 1.1; }
+      .h1 .hl { background: var(--accent); color: var(--ink); padding: 0 18px; }
+      .sub-en { font-size: 28px; color: var(--muted); font-weight: 400; margin-top: 10px; }
+      .num { font-variant-numeric: tabular-nums; }
+
+      /* ---------- s0 intro ---------- */
+      #s0 .logo-wrap { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+      #s0 .mark { display: flex; align-items: center; gap: 28px; }
+      #s0 .mark-box { width: 128px; height: 128px; background: var(--accent); color: var(--ink); font-size: 72px; font-weight: 900; display: flex; align-items: center; justify-content: center; border-radius: 18px; letter-spacing: -0.04em; }
+      #s0 .mark-text { font-size: 150px; font-weight: 900; letter-spacing: -0.02em; line-height: 1; }
+      #s0 .mark-line { width: 760px; height: 4px; background: var(--accent); margin: 36px 0 28px; transform-origin: center; }
+      #s0 .mark-sub { font-size: 44px; font-weight: 700; }
+      #s0 .mark-date { font-size: 28px; color: var(--accent); letter-spacing: 0.18em; margin-top: 16px; font-weight: 700; }
+
+      /* ---------- s1 hero ---------- */
+      #s1 .content { padding-top: 190px; }
+      #s1 .big { display: flex; align-items: flex-end; gap: 30px; margin-top: 10px; }
+      #s1 .big .n { font-size: 300px; font-weight: 900; line-height: 0.9; background: var(--accent); color: var(--ink); padding: 0 26px 10px; letter-spacing: -0.04em; }
+      #s1 .big .w { font-size: 120px; font-weight: 900; line-height: 1; padding-bottom: 22px; }
+      #s1 .doc { position: absolute; width: 300px; height: 400px; background: var(--panel2); border-radius: 14px; border: 3px solid rgba(255,255,255,.14); box-shadow: 0 40px 80px rgba(0,0,0,.45); padding: 34px 30px; display: flex; flex-direction: column; gap: 22px; }
+      #s1 .doc i { display: block; height: 14px; background: rgba(255,255,255,.22); border-radius: 7px; }
+      #s1 .doc i.t { height: 26px; width: 60%; background: var(--accent); }
+      #s1 .doc i.s { width: 80%; }
+      #s1 .doc i.m { width: 92%; }
+      #s1 .doc i.l { width: 70%; }
+      #s1 .gear { position: absolute; border-radius: 50%; border: 22px dashed rgba(245,180,0,.55); }
+
+      /* ---------- s2 design ---------- */
+      #s2 .tiles { display: flex; gap: 28px; margin-top: 34px; }
+      #s2 .tile { flex: 1; background: var(--panel); border-radius: 18px; padding: 30px 38px; border: 2px solid rgba(255,255,255,.08); }
+      #s2 .tile .v { font-size: 104px; font-weight: 900; line-height: 1; color: var(--accent2); }
+      #s2 .tile .l { font-size: 30px; font-weight: 700; margin-top: 8px; }
+      #s2 .tile .e { font-size: 20px; color: var(--muted); margin-top: 4px; }
+      #s2 .split { margin-top: 30px; }
+      #s2 .split .bar { display: flex; height: 64px; border-radius: 12px; overflow: hidden; width: 1740px; }
+      #s2 .split .bar .a { width: 1177px; background: var(--accent); transform-origin: left center; }
+      #s2 .split .bar .b { width: 563px; background: var(--blue); transform-origin: left center; }
+      #s2 .split .lbl { display: flex; justify-content: space-between; width: 1740px; margin-top: 14px; font-size: 30px; font-weight: 700; }
+      #s2 .split .lbl span b { color: var(--accent2); }
+      #s2 .split .lbl span:last-child b { color: var(--blue); }
+      #s2 .steps { display: flex; gap: 20px; margin-top: 34px; }
+      #s2 .step { flex: 1; background: var(--panel2); border-radius: 14px; padding: 20px 26px; display: flex; gap: 18px; align-items: center; }
+      #s2 .step .d { font-size: 22px; color: var(--accent); font-weight: 700; white-space: nowrap; font-family: Consolas, "DejaVu Sans Mono", monospace; }
+      #s2 .step .t { font-size: 28px; font-weight: 700; }
+      #s2 .step .t small { display: block; font-size: 18px; color: var(--muted); font-weight: 400; }
+      #s2 .step.noai { border: 3px solid var(--red); }
+
+      /* ---------- s3 chart ---------- */
+      #s3 .chart { position: absolute; left: 90px; top: 340px; width: 1740px; height: 400px; }
+      #s3 .base { position: absolute; left: 0; bottom: 0; width: 100%; height: 3px; background: rgba(255,255,255,.3); transform-origin: left; }
+      #s3 .bar { position: absolute; bottom: 3px; width: 220px; background: var(--accent); transform-origin: bottom; border-radius: 8px 8px 0 0; }
+      #s3 .bar.alt { background: var(--blue); }
+      #s3 .bv { position: absolute; width: 220px; text-align: center; font-size: 60px; font-weight: 900; color: var(--fg); }
+      #s3 .bl { position: absolute; width: 300px; margin-left: -40px; text-align: center; top: 412px; font-size: 28px; font-weight: 700; }
+      #s3 .bl small { display: block; font-size: 18px; color: var(--muted); font-weight: 400; }
+      #s3 .grp { position: absolute; top: -52px; font-size: 26px; color: var(--muted); letter-spacing: 0.1em; }
+      #s3 .vline { position: absolute; left: 870px; top: -52px; width: 2px; height: 452px; background: rgba(255,255,255,.16); transform-origin: top; }
+
+      /* ---------- s4 twist ---------- */
+      #s4 .cards { display: flex; gap: 40px; margin-top: 36px; }
+      #s4 .card { flex: 1; height: 400px; border-radius: 22px; padding: 40px 48px; position: relative; overflow: hidden; }
+      #s4 .card.sen { background: var(--accent); color: var(--ink); }
+      #s4 .card.jun { background: var(--panel); border: 3px solid var(--red); }
+      #s4 .card .who { font-size: 36px; font-weight: 700; }
+      #s4 .card .who small { font-size: 20px; opacity: .75; margin-left: 14px; font-weight: 400; }
+      #s4 .card .val { font-size: 190px; font-weight: 900; line-height: 1; margin-top: 18px; letter-spacing: -0.04em; }
+      #s4 .card.jun .val { color: var(--red); }
+      #s4 .card .p { position: absolute; right: 44px; bottom: 34px; font-family: Consolas, "DejaVu Sans Mono", monospace; font-size: 26px; opacity: .8; }
+      #s4 .card .fill { position: absolute; left: 0; bottom: 0; width: 100%; height: 14px; background: rgba(0,0,0,.25); transform-origin: left; }
+      #s4 .chip { display: inline-block; margin-top: 18px; background: var(--panel2); border-radius: 999px; padding: 10px 28px; font-size: 28px; font-weight: 700; }
+      #s4 .chip b { color: var(--accent2); }
+      #s4 .card .val { opacity: 0; }
+      #s4 .card .q { position: absolute; left: 48px; top: 120px; font-size: 190px; font-weight: 900; line-height: 1; opacity: .35; }
+      #s4 .stamp { position: absolute; right: 120px; top: 150px; border: 8px solid var(--red); color: var(--red); font-size: 64px; font-weight: 900; padding: 10px 34px; transform: rotate(-8deg); letter-spacing: 0.08em; opacity: 0; }
+
+      /* ---------- s5 split ---------- */
+      #s5 .rows { margin-top: 36px; display: flex; flex-direction: column; gap: 22px; width: 1740px; }
+      #s5 .row { display: flex; align-items: center; gap: 30px; height: 84px; }
+      #s5 .row .n { width: 260px; font-size: 32px; font-weight: 700; text-align: right; }
+      #s5 .row .n small { display: block; font-size: 18px; color: var(--muted); font-weight: 400; }
+      #s5 .row .track { position: relative; width: 1100px; height: 56px; }
+      #s5 .row .mid { position: absolute; left: 550px; top: 0; width: 2px; height: 56px; background: rgba(255,255,255,.35); }
+      #s5 .row .f { position: absolute; top: 0; height: 56px; border-radius: 10px; }
+      #s5 .row .f.up { left: 551px; background: var(--red); transform-origin: left; }
+      #s5 .row .f.down { right: 551px; background: var(--blue); transform-origin: right; }
+      #s5 .row .v { width: 250px; font-size: 52px; font-weight: 900; }
+      #s5 .words { position: absolute; left: 90px; top: 560px; display: flex; gap: 60px; align-items: center; }
+      #s5 .word { font-size: 120px; font-weight: 900; line-height: 1; padding: 6px 30px; }
+      #s5 .word.a { background: var(--accent); color: var(--ink); }
+      #s5 .word.b { border: 4px solid var(--red); color: var(--red); }
+      #s5 .word small { display: block; font-size: 22px; font-weight: 400; letter-spacing: 0.1em; margin-top: 10px; }
+      #s5 .vs { font-size: 54px; color: var(--muted); font-weight: 400; }
+
+      /* ---------- s6 interpretation ---------- */
+      #s6 .content { padding-top: 160px; }
+      #s6 .t1 { font-size: 180px; font-weight: 900; line-height: 1; letter-spacing: -0.02em; color: var(--accent2); }
+      #s6 .t1e { font-size: 30px; color: var(--muted); margin-top: 8px; letter-spacing: 0.12em; }
+      #s6 .flow { display: flex; align-items: center; gap: 34px; margin-top: 46px; font-size: 44px; font-weight: 700; }
+      #s6 .flow .box { background: var(--panel); border-radius: 14px; padding: 16px 30px; border: 2px solid rgba(255,255,255,.1); }
+      #s6 .flow .arr { color: var(--accent); font-size: 60px; }
+      #s6 .concl { margin-top: 54px; font-size: 76px; font-weight: 900; line-height: 1.25; }
+      #s6 .concl .box { background: var(--red); color: #fff; padding: 2px 22px; }
+
+      /* ---------- s7 快讯 ---------- */
+      #s7 .content { padding-top: 140px; }
+      #s7 .list { display: flex; flex-direction: column; gap: 18px; margin-top: 20px; width: 1740px; }
+      #s7 .item { display: flex; align-items: center; gap: 26px; background: var(--panel); border-radius: 16px; padding: 18px 30px; min-height: 108px; }
+      #s7 .item .src { flex: 0 0 200px; background: var(--panel2); border-radius: 10px; padding: 10px 14px; text-align: center; font-size: 20px; color: var(--accent2); font-weight: 700; font-family: Consolas, "DejaVu Sans Mono", monospace; }
+      #s7 .item .txt { font-size: 36px; font-weight: 700; line-height: 1.3; }
+      #s7 .item .txt small { display: block; font-size: 20px; color: var(--muted); font-weight: 400; margin-top: 4px; }
+      #s7 .item .idx { flex: 0 0 60px; font-size: 44px; font-weight: 900; color: var(--accent); font-family: Consolas, "DejaVu Sans Mono", monospace; }
+
+      /* ---------- s8 outro ---------- */
+      #s8 .content { align-items: flex-start; justify-content: center; padding-bottom: 200px; }
+      #s8 .src-tag { background: var(--accent); color: var(--ink); font-size: 24px; font-weight: 700; padding: 6px 18px; display: inline-block; }
+      #s8 .paper { font-size: 60px; font-weight: 900; line-height: 1.25; margin-top: 20px; max-width: 1700px; }
+      #s8 .authors { font-size: 26px; color: var(--muted); margin-top: 18px; }
+      #s8 .bye { font-size: 110px; font-weight: 900; margin-top: 70px; }
+      #s8 .bye span { color: var(--accent); }
+      #black { position: absolute; inset: 0; background: #000; opacity: 0; z-index: 90; pointer-events: none; }
+
+      /* ---------- persistent overlay ---------- */
+      #overlay { position: absolute; inset: 0; z-index: 50; pointer-events: none; opacity: 0; }
+      #tag { position: absolute; left: 60px; top: 44px; display: flex; align-items: stretch; height: 56px; }
+      #tag .brand { background: var(--accent); color: var(--ink); font-size: 28px; font-weight: 900; padding: 0 22px; display: flex; align-items: center; }
+      #tag .segs { position: relative; width: 500px; }
+      #tag .seg { position: absolute; left: 0; top: 0; height: 56px; background: rgba(255,255,255,.1); padding: 0 24px; display: flex; align-items: center; font-size: 26px; font-weight: 700; white-space: nowrap; opacity: 0; }
+      #date { position: absolute; right: 60px; top: 50px; font-family: Consolas, "DejaVu Sans Mono", monospace; font-size: 24px; color: var(--muted); letter-spacing: 0.12em; }
+      #ticker { position: absolute; left: 0; bottom: 0; width: 1920px; height: 58px; background: var(--bg2); border-top: 2px solid rgba(255,255,255,.08); display: flex; overflow: hidden; }
+      #ticker .lab { flex: 0 0 150px; background: var(--accent); color: var(--ink); font-size: 26px; font-weight: 900; display: flex; align-items: center; justify-content: center; z-index: 2; }
+      #ticker .win { position: relative; flex: 1; overflow: hidden; }
+      #ticker .strip { position: absolute; left: 0; top: 0; height: 58px; display: flex; align-items: center; white-space: nowrap; font-size: 26px; font-weight: 700; }
+      #ticker .strip span { padding: 0 40px; }
+      #ticker .strip span::before { content: "›"; color: var(--accent); margin-right: 18px; font-size: 30px; }
+
+      /* ---------- captions (lower third) ---------- */
+      #captions { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 60; pointer-events: none; }
+      .cap { position: absolute; left: 70px; bottom: 98px; width: 1780px; opacity: 0; }
+      .cap .zh { font-size: 50px; font-weight: 900; line-height: 1.3; text-shadow: 0 4px 18px rgba(0,0,0,.6); }
+      .cap .en { font-size: 25px; color: var(--muted); margin-top: 8px; line-height: 1.3; text-shadow: 0 2px 10px rgba(0,0,0,.6); }
+      .cap .bar { position: absolute; left: -24px; top: 6px; width: 8px; height: 60px; background: var(--accent); transform-origin: top; }
+
+      /* ---------- transition sweep ---------- */
+      #sweep { position: absolute; top: 0; left: -40px; width: 28px; height: 1080px; background: var(--accent); z-index: 70; opacity: 0; box-shadow: 0 0 40px rgba(245,180,0,.8); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="ai-daily" data-start="0" data-duration="__TOTAL__" data-width="1920" data-height="1080">
+
+      <!-- ===== S0 intro ===== -->
+      <div id="s0" class="scene" style="z-index:1">
+        <div class="rays" id="s0-rays"></div>
+        <div class="glow" id="s0-glow" style="left:660px;top:240px;width:600px;height:600px;background:rgba(78,161,255,.35)"></div>
+        <div class="logo-wrap">
+          <div class="mark"><div class="mark-box" id="s0-box">AI</div><div class="mark-text" id="s0-text">AI 日报</div></div>
+          <div class="mark-line" id="s0-line"></div>
+          <div class="mark-sub" id="s0-sub">人工智能 · 每日要闻</div>
+          <div class="mark-date" id="s0-date">AI DAILY · 2026.11.06 THU</div>
+        </div>
+      </div>
+
+      <!-- ===== S1 hero ===== -->
+      <div id="s1" class="scene" style="z-index:2">
+        <div class="grid"></div>
+        <div class="glow" id="s1-glow" style="left:1100px;top:120px;width:800px;height:800px;background:rgba(245,180,0,.22)"></div>
+        <div class="ghost" data-layout-ignore id="s1-ghost" style="right:-60px;top:80px;font-size:520px">133</div>
+        <div class="doc" id="s1-doc1" style="left:1240px;top:230px;transform:rotate(-8deg)"><i class="t"></i><i class="s"></i><i class="m"></i><i class="l"></i><i class="m"></i><i class="s"></i></div>
+        <div class="doc" id="s1-doc2" style="left:1480px;top:300px;transform:rotate(6deg)"><i class="t"></i><i class="m"></i><i class="s"></i><i class="l"></i><i class="m"></i><i class="s"></i></div>
+        <div class="gear" id="s1-gear" style="left:1130px;top:560px;width:220px;height:220px"></div>
+        <div class="content">
+          <div class="kicker" id="s1-kicker">3 个月 AI 实验 · NBER 工作论文</div>
+          <div class="big"><div class="n num" id="s1-n">133</div><div class="w" id="s1-w">位律师</div></div>
+          <div class="sub-en" id="s1-en">133 patent lawyers, 3 months of AI, then the AI was taken away</div>
+        </div>
+      </div>
+
+      <!-- ===== S2 design ===== -->
+      <div id="s2" class="scene" style="z-index:3">
+        <div class="grid"></div>
+        <div class="glow" id="s2-glow" style="left:-200px;top:500px;width:900px;height:700px;background:rgba(78,161,255,.22)"></div>
+        <div class="content">
+          <div class="kicker" id="s2-kicker">实验设计 · Autor et al., NBER w35720</div>
+          <div class="tiles">
+            <div class="tile" id="s2-t1"><div class="v num">133</div><div class="l">位专利律师</div><div class="e">patent lawyers</div></div>
+            <div class="tile" id="s2-t2"><div class="v num">11</div><div class="l">家美国知识产权律所</div><div class="e">U.S. IP law firms</div></div>
+            <div class="tile" id="s2-t3"><div class="v num">3</div><div class="l">个月随机对照试验</div><div class="e">months, pre-registered RCT</div></div>
+          </div>
+          <div class="split" id="s2-split">
+            <div class="bar"><div class="a" id="s2-ba"></div><div class="b" id="s2-bb"></div></div>
+            <div class="lbl"><span><b>90</b> 人 · AI 起草助手 + 培训</span><span><b>43</b> 人 · 对照组</span></div>
+          </div>
+          <div class="steps">
+            <div class="step" id="s2-st1"><div class="d">DAY 10</div><div class="t">AI 辅助起草<small>benchmark drafting task</small></div></div>
+            <div class="step" id="s2-st2"><div class="d">DAY 90</div><div class="t">AI 辅助起草 · 更难<small>harder drafting task</small></div></div>
+            <div class="step noai" id="s2-st3"><div class="d">DAY 90</div><div class="t">无 AI · 独立修订缺陷草稿<small>redline without AI</small></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S3 with AI ===== -->
+      <div id="s3" class="scene" style="z-index:4">
+        <div class="grid"></div>
+        <div class="glow" id="s3-glow" style="left:1200px;top:-200px;width:900px;height:700px;background:rgba(245,180,0,.18)"></div>
+        <div class="content">
+          <div class="kicker" id="s3-kicker">有 AI 辅助时 · 起草质量提升（标准差）</div>
+          <div class="sub-en" id="s3-en">Drafting quality vs. control group, in standard deviations</div>
+        </div>
+        <div class="chart">
+          <div class="grp" id="s3-g1" style="left:0">全体 · ALL LAWYERS</div>
+          <div class="grp" id="s3-g2" style="left:900px">第 90 天 · BY SENIORITY</div>
+          <div class="vline" id="s3-vl"></div>
+          <div class="base" id="s3-base"></div>
+          <div class="bar" id="s3-b1" style="left:60px;height:200px"></div>
+          <div class="bar" id="s3-b2" style="left:420px;height:224px"></div>
+          <div class="bar alt" id="s3-b3" style="left:960px;height:354px"></div>
+          <div class="bar alt" id="s3-b4" style="left:1320px;height:177px"></div>
+          <div class="bv num" id="s3-v1" style="left:60px;bottom:214px">+0.34</div>
+          <div class="bv num" id="s3-v2" style="left:420px;bottom:238px">+0.38</div>
+          <div class="bv num" id="s3-v3" style="left:960px;bottom:368px">+0.60</div>
+          <div class="bv num" id="s3-v4" style="left:1320px;bottom:191px">+0.30</div>
+          <div class="bl" id="s3-l1" style="left:60px">第 10 天<small>p = 0.03</small></div>
+          <div class="bl" id="s3-l2" style="left:420px">第 90 天<small>p = 0.01</small></div>
+          <div class="bl" id="s3-l3" style="left:960px">新人律师<small>&lt; 7 年 · p = 0.02</small></div>
+          <div class="bl" id="s3-l4" style="left:1320px">资深律师<small>≥ 7 年 · p = 0.08</small></div>
+        </div>
+      </div>
+
+      <!-- ===== S4 twist ===== -->
+      <div id="s4" class="scene" style="z-index:5">
+        <div class="grid"></div>
+        <div class="glow" id="s4-glow" style="left:500px;top:300px;width:900px;height:600px;background:rgba(255,77,77,.16)"></div>
+        <div class="stamp" id="s4-stamp">AI ✕ 撤掉</div>
+        <div class="content">
+          <div class="kicker" id="s4-kicker">撤掉 AI 之后 · 独立修订缺陷专利草稿</div>
+          <div><div class="chip" id="s4-chip">整体领先 <b class="num">+0.32 SD</b> · p = 0.04 · 但优势几乎全部来自资深律师</div></div>
+          <div class="cards">
+            <div class="card sen" id="s4-c1"><div class="who">资深律师<small>SENIOR · ≥ 7 yrs</small></div><div class="q">?</div><div class="val num" id="s4-v1">+0.00</div><div class="p">p = 0.02</div><div class="fill" id="s4-f1"></div></div>
+            <div class="card jun" id="s4-c2"><div class="who">新人律师<small>JUNIOR · &lt; 7 yrs</small></div><div class="q">?</div><div class="val num" id="s4-v2">0.00</div><div class="p">p = 0.89</div><div class="fill" id="s4-f2"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S5 bifurcation ===== -->
+      <div id="s5" class="scene" style="z-index:6">
+        <div class="grid"></div>
+        <div class="glow" id="s5-glow" style="left:1100px;top:400px;width:800px;height:600px;background:rgba(78,161,255,.2)"></div>
+        <div class="content">
+          <div class="kicker" id="s5-kicker">新人律师 · 独立修订的分数分布变化（百分点）</div>
+          <div class="rows">
+            <div class="row" id="s5-r1"><div class="n">最低档<small>lowest tier</small></div><div class="track"><div class="mid"></div><div class="f up" id="s5-f1" style="width:242px"></div></div><div class="v num" id="s5-v1" style="color:var(--red)">+22</div></div>
+            <div class="row" id="s5-r2"><div class="n">中等偏下<small>lower-middle</small></div><div class="track"><div class="mid"></div><div class="f down" id="s5-f2" style="width:462px"></div></div><div class="v num" id="s5-v2" style="color:var(--blue)">−42</div></div>
+            <div class="row" id="s5-r3"><div class="n">高分段<small>top tier</small></div><div class="track"><div class="mid"></div><div class="f up" id="s5-f3" style="width:150px;background:var(--accent)"></div></div><div class="v num" id="s5-v3" style="color:var(--accent2)">↑ 变多</div></div>
+          </div>
+        </div>
+        <div class="words">
+          <div class="word a" id="s5-w1">跳板<small>SPRINGBOARD</small></div>
+          <div class="vs" id="s5-vs">or</div>
+          <div class="word b" id="s5-w2">垫子<small>CUSHION</small></div>
+        </div>
+      </div>
+
+      <!-- ===== S6 interpretation ===== -->
+      <div id="s6" class="scene" style="z-index:7">
+        <div class="grid"></div>
+        <div class="glow" id="s6-glow" style="left:1000px;top:0;width:1000px;height:800px;background:rgba(245,180,0,.14)"></div>
+        <div class="ghost" data-layout-ignore id="s6-ghost" style="left:900px;top:120px;font-size:420px">WHY</div>
+        <div class="content">
+          <div class="t1" id="s6-t1">认知卸载</div>
+          <div class="t1e" id="s6-t1e">COGNITIVE OFFLOADING · the paper's hypothesis</div>
+          <div class="flow">
+            <div class="box" id="s6-f1">直接接受 AI 文稿</div><div class="arr" id="s6-a1">→</div>
+            <div class="box" id="s6-f2">跳过找漏洞、权衡范围</div><div class="arr" id="s6-a2">→</div>
+            <div class="box" id="s6-f3" style="border-color:var(--red)">判断力没练出来</div>
+          </div>
+          <div class="concl" id="s6-c">结论：<span class="box">基本功是前提</span>，才能从 AI 里学到真本事</div>
+        </div>
+      </div>
+
+      <!-- ===== S7 快讯 ===== -->
+      <div id="s7" class="scene" style="z-index:8">
+        <div class="grid"></div>
+        <div class="glow" id="s7-glow" style="left:-100px;top:-100px;width:800px;height:800px;background:rgba(245,180,0,.14)"></div>
+        <div class="content">
+          <div class="kicker" id="s7-kicker">快讯 · QUICK NEWS · 2026.11.05–06</div>
+          <div class="list">
+            <div class="item" id="s7-i1"><div class="idx">01</div><div class="txt">OpenAI 发布网络安全模型 GPT-6 Cyber<small>agents flagged 2,308 potential Linux kernel flaws, working exploits for 948</small></div><div class="src">OpenAI</div></div>
+            <div class="item" id="s7-i2"><div class="idx">02</div><div class="txt">Meta 收购 AI 编程初创公司 Conductor<small>cloud service shuts down November 20</small></div><div class="src">Axios · TechCrunch</div></div>
+            <div class="item" id="s7-i3"><div class="idx">03</div><div class="txt">苹果削减工程师 AI 日额度：$300 → $200<small>further cut to $100 under consideration</small></div><div class="src">Bloomberg</div></div>
+            <div class="item" id="s7-i4"><div class="idx">04</div><div class="txt">Anthropic 与美联社签下首个付费授权协议<small>AP election coverage for Claude</small></div><div class="src">Adweek</div></div>
+            <div class="item" id="s7-i5"><div class="idx">05</div><div class="txt">DeepSeek 开源自主智能体研究原型<small>"super agent" prototype on GitHub</small></div><div class="src">SCMP</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== S8 outro ===== -->
+      <div id="s8" class="scene" style="z-index:9">
+        <div class="rays" id="s8-rays"></div>
+        <div class="glow" id="s8-glow" style="left:900px;top:200px;width:700px;height:700px;background:rgba(78,161,255,.25)"></div>
+        <div class="content">
+          <div><span class="src-tag" id="s8-tag">来源 · SOURCE</span></div>
+          <div class="paper" id="s8-paper">Does AI Assistance Enhance or Erode Expertise? Evidence from a Three-Month Field Experiment in Patent Drafting</div>
+          <div class="authors" id="s8-authors">Autor, Rodchenko, Martin, Iscenko, Strand, Pearl &amp; Ferere · NBER Working Paper 35720 · Sept 2026, rev. Oct 2026</div>
+          <div class="bye" id="s8-bye">感谢收看，<span>明天见</span></div>
+        </div>
+      </div>
+      <div id="black"></div>
+
+      <!-- ===== persistent overlay ===== -->
+      <div id="overlay">
+        <div id="tag"><div class="brand">AI 日报</div><div class="segs" id="segs"></div></div>
+        <div id="date">AI DAILY · 2026.11.06</div>
+        <div id="ticker"><div class="lab">快讯</div><div class="win"><div class="strip" id="strip" data-layout-ignore></div></div></div>
+      </div>
+      <div id="captions"></div>
+      <div id="sweep"></div>
+
+      <!-- ===== narration ===== -->
+<!--__AUDIO__-->
+    </div>
+
+    <script>
+      var DATA = /*__DATA__*/;
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+      var S = {};
+      DATA.scenes.forEach(function (s) { S[s.id] = s; });
+      function u(id, i) { return S[id].units[i].start; }   // absolute start of narration unit i
+      var FT = function (sel, from, to, t) { tl.fromTo(sel, from, to, t); };
+      var TOTAL = DATA.total;
+
+      /* ---------- captions ---------- */
+      var capBox = document.getElementById("captions");
+      DATA.captions.forEach(function (c, i) {
+        var el = document.createElement("div");
+        el.className = "cap"; el.id = "cap-" + i;
+        el.innerHTML = '<div class="bar"></div><div class="zh"></div><div class="en"></div>';
+        el.querySelector(".zh").textContent = c.zh;
+        el.querySelector(".en").textContent = c.en;
+        capBox.appendChild(el);
+        var end = (i < DATA.captions.length - 1) ? Math.min(c.end + 0.35, DATA.captions[i + 1].start - 0.02) : c.end + 0.6;
+        tl.fromTo(el, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.22, ease: "power2.out" }, c.start - 0.08);
+        tl.fromTo(el.querySelector(".bar"), { scaleY: 0 }, { scaleY: 1, duration: 0.3, ease: "power3.out" }, c.start - 0.04);
+        tl.to(el, { opacity: 0, duration: 0.12, ease: "power2.in" }, end - 0.12);
+        tl.set(el, { opacity: 0 }, end);
+      });
+
+      /* ---------- segment labels ---------- */
+      var segs = document.getElementById("segs");
+      DATA.scenes.forEach(function (s, i) {
+        if (!s.seg) return;
+        var el = document.createElement("div");
+        el.className = "seg"; el.id = "seg-" + s.id; el.textContent = s.seg;
+        segs.appendChild(el);
+        tl.fromTo(el, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, s.start + 0.5);
+        var next = DATA.scenes[i + 1];
+        if (next) tl.set(el, { opacity: 0 }, next.start + 0.5);
+      });
+
+      /* ---------- overlay + ticker ---------- */
+      var t1 = S.s1.start;
+      tl.fromTo("#overlay", { opacity: 0 }, { opacity: 1, duration: 0.5 }, t1 + 0.3);
+      var strip = document.getElementById("strip");
+      DATA.ticker.concat(DATA.ticker).forEach(function (txt) { var sp = document.createElement("span"); sp.textContent = txt; strip.appendChild(sp); });
+      var halfW = strip.offsetWidth / 2;
+      var tickDur = halfW / 130;
+      var tickRep = Math.ceil((TOTAL - t1) / tickDur);
+      tl.fromTo(strip, { x: 0 }, { x: -halfW, duration: tickDur, ease: "none", repeat: tickRep }, t1);
+
+      /* ---------- scene transitions (wipe + sweep) ---------- */
+      DATA.scenes.forEach(function (s, i) {
+        if (i === 0) return;
+        var T = s.start, el = "#" + s.id;
+        tl.set(el, { opacity: 1, clipPath: "inset(0 100% 0 0)" }, T);
+        tl.to(el, { clipPath: "inset(0 0% 0 0)", duration: 0.55, ease: "power3.inOut" }, T);
+        tl.set("#sweep", { opacity: 1 }, T);
+        tl.fromTo("#sweep", { x: 0 }, { x: 1990, duration: 0.55, ease: "power3.inOut" }, T);
+        tl.set("#sweep", { opacity: 0 }, T + 0.56);
+        var prev = DATA.scenes[i - 1];
+        tl.set("#" + prev.id, { opacity: 0 }, T + 0.6);
+      });
+
+      /* ---------- S0 intro ---------- */
+      (function () {
+        var T = S.s0.start, D = S.s0.dur;
+        FT("#s0-rays", { rotation: 0, scale: 1 }, { rotation: 12, scale: 1.08, duration: D, ease: "none" }, T);
+        FT("#s0-glow", { scale: 0.8, opacity: 0.6 }, { scale: 1.25, opacity: 1, duration: D, ease: "sine.inOut" }, T);
+        FT("#s0-box", { scale: 0, rotation: -90, opacity: 0 }, { scale: 1, rotation: 0, opacity: 1, duration: 0.7, ease: "back.out(1.6)" }, T + 0.2);
+        FT("#s0-text", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, T + 0.45);
+        FT("#s0-line", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "expo.out" }, T + 0.8);
+        FT("#s0-sub", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, T + 1.0);
+        FT("#s0-date", { opacity: 0, letterSpacing: "0.5em" }, { opacity: 1, letterSpacing: "0.18em", duration: 0.8, ease: "power3.out" }, T + 1.2);
+      })();
+
+      /* ---------- S1 hero ---------- */
+      (function () {
+        var T = S.s1.start, D = S.s1.dur;
+        FT("#s1-glow", { scale: 0.9 }, { scale: 1.2, duration: D, ease: "sine.inOut" }, T);
+        FT("#s1-ghost", { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: 1.4, ease: "power2.out" }, T + 0.3);
+        FT("#s1-doc1", { y: 120, opacity: 0, rotation: -20 }, { y: 0, opacity: 1, rotation: -8, duration: 0.9, ease: "back.out(1.2)" }, T + 0.5);
+        FT("#s1-doc2", { y: 160, opacity: 0, rotation: 18 }, { y: 0, opacity: 1, rotation: 6, duration: 0.9, ease: "back.out(1.2)" }, T + 0.7);
+        FT("#s1-gear", { rotation: 0, opacity: 0 }, { rotation: 180, opacity: 1, duration: D, ease: "none" }, T + 0.6);
+        FT("#s1-kicker", { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, T + 0.5);
+        FT("#s1-n", { scaleX: 0, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.7, ease: "expo.out", transformOrigin: "left center" }, u("s1", 1) - 0.2);
+        FT("#s1-w", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, u("s1", 1) + 0.2);
+        FT("#s1-en", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.out" }, u("s1", 2));
+      })();
+
+      /* ---------- S2 design ---------- */
+      (function () {
+        var T = S.s2.start, D = S.s2.dur;
+        FT("#s2-glow", { x: -80 }, { x: 80, duration: D, ease: "sine.inOut" }, T);
+        FT("#s2-kicker", { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, T + 0.5);
+        ["#s2-t1", "#s2-t2", "#s2-t3"].forEach(function (id, i) {
+          FT(id, { y: 50, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.6, ease: "back.out(1.4)" }, u("s2", 0) + 0.4 + i * 0.14);
+        });
+        FT("#s2-split", { opacity: 0 }, { opacity: 1, duration: 0.3 }, u("s2", 3) - 0.1);
+        FT("#s2-ba", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "expo.out" }, u("s2", 3));
+        FT("#s2-bb", { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "expo.out" }, u("s2", 3) + 0.5);
+        ["#s2-st1", "#s2-st2", "#s2-st3"].forEach(function (id, i) {
+          FT(id, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, u("s2", 4) + i * 0.22);
+        });
+      })();
+
+      /* ---------- S3 chart ---------- */
+      (function () {
+        var T = S.s3.start, D = S.s3.dur;
+        FT("#s3-glow", { scale: 1 }, { scale: 1.3, duration: D, ease: "sine.inOut" }, T);
+        FT("#s3-kicker", { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, T + 0.5);
+        FT("#s3-en", { opacity: 0 }, { opacity: 1, duration: 0.6 }, T + 0.8);
+        FT("#s3-base", { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "expo.out" }, T + 0.7);
+        FT("#s3-g1", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4 }, u("s3", 1) - 0.2);
+        function bar(b, v, l, t, val, pre) {
+          FT(b, { scaleY: 0 }, { scaleY: 1, duration: 0.9, ease: "expo.out" }, t);
+          var o = { v: 0 }; var el = document.querySelector(v);
+          tl.fromTo(o, { v: 0 }, { v: val, duration: 0.9, ease: "power2.out", onUpdate: function () { el.textContent = pre + o.v.toFixed(2); } }, t);
+          FT(v, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 }, t);
+          FT(l, { opacity: 0 }, { opacity: 1, duration: 0.4 }, t + 0.2);
+        }
+        bar("#s3-b1", "#s3-v1", "#s3-l1", u("s3", 1) + 0.6, 0.34, "+");
+        bar("#s3-b2", "#s3-v2", "#s3-l2", u("s3", 2) + 0.4, 0.38, "+");
+        FT("#s3-vl", { scaleY: 0 }, { scaleY: 1, duration: 0.5, ease: "power2.out" }, u("s3", 3) - 0.3);
+        FT("#s3-g2", { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.4 }, u("s3", 3) - 0.2);
+        bar("#s3-b3", "#s3-v3", "#s3-l3", u("s3", 3) + 0.3, 0.60, "+");
+        bar("#s3-b4", "#s3-v4", "#s3-l4", u("s3", 3) + 1.6, 0.30, "+");
+      })();
+
+      /* ---------- S4 twist ---------- */
+      (function () {
+        var T = S.s4.start, D = S.s4.dur;
+        FT("#s4-glow", { scale: 0.8, opacity: 0.6 }, { scale: 1.3, opacity: 1, duration: D, ease: "sine.inOut" }, T);
+        FT("#s4-kicker", { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, T + 0.5);
+        FT("#s4-chip", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, u("s4", 2));
+        FT("#s4-stamp", { scale: 2.2, opacity: 0, rotation: -20 }, { scale: 1, opacity: 1, rotation: -8, duration: 0.45, ease: "power4.out" }, u("s4", 1) + 1.0);
+        tl.set("#s4-stamp", { opacity: 0 }, u("s4", 4) - 0.3);
+        FT("#s4-c1", { x: -120, opacity: 0, rotation: -2 }, { x: 0, opacity: 1, rotation: 0, duration: 0.7, ease: "back.out(1.3)" }, u("s4", 1) + 2.2);
+        FT("#s4-c2", { x: 120, opacity: 0, rotation: 2 }, { x: 0, opacity: 1, rotation: 0, duration: 0.7, ease: "back.out(1.3)" }, u("s4", 1) + 2.5);
+        tl.set("#s4-c1 .q", { opacity: 0 }, u("s4", 4));
+        FT("#s4-v1", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)", transformOrigin: "left center" }, u("s4", 4));
+        tl.set("#s4-c2 .q", { opacity: 0 }, u("s4", 4) + 1.7);
+        FT("#s4-v2", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.5)", transformOrigin: "left center" }, u("s4", 4) + 1.7);
+        var o1 = { v: 0 }, e1 = document.getElementById("s4-v1");
+        tl.fromTo(o1, { v: 0 }, { v: 0.45, duration: 1.0, ease: "power2.out", onUpdate: function () { e1.textContent = "+" + o1.v.toFixed(2); } }, u("s4", 4));
+        FT("#s4-f1", { scaleX: 0 }, { scaleX: 1, duration: 1.0, ease: "power2.out" }, u("s4", 4));
+        var o2 = { v: 0 }, e2 = document.getElementById("s4-v2");
+        tl.fromTo(o2, { v: 0 }, { v: -0.03, duration: 0.8, ease: "power2.out", onUpdate: function () { e2.textContent = (o2.v < 0 ? "−" : "") + Math.abs(o2.v).toFixed(2); } }, u("s4", 4) + 1.7);
+        FT("#s4-f2", { scaleX: 0 }, { scaleX: 0.06, duration: 0.8, ease: "power2.out" }, u("s4", 4) + 1.7);
+      })();
+
+      /* ---------- S5 bifurcation ---------- */
+      (function () {
+        var T = S.s5.start, D = S.s5.dur;
+        FT("#s5-glow", { x: 0 }, { x: -120, duration: D, ease: "sine.inOut" }, T);
+        FT("#s5-kicker", { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, T + 0.5);
+        ["#s5-r1", "#s5-r2", "#s5-r3"].forEach(function (id, i) {
+          FT(id, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, u("s5", 0) + 0.5 + i * 0.18);
+        });
+        function row(r, f, v, t) {
+          FT(f, { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: "expo.out" }, t);
+          FT(v, { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)" }, t + 0.25);
+        }
+        row("#s5-r1", "#s5-f1", "#s5-v1", u("s5", 1) + 0.3);
+        row("#s5-r2", "#s5-f2", "#s5-v2", u("s5", 2) + 0.2);
+        row("#s5-r3", "#s5-f3", "#s5-v3", u("s5", 2) + 2.4);
+        FT("#s5-w1", { y: 60, opacity: 0, rotation: -4 }, { y: 0, opacity: 1, rotation: 0, duration: 0.6, ease: "back.out(1.5)" }, u("s5", 3) + 1.6);
+        FT("#s5-vs", { opacity: 0 }, { opacity: 1, duration: 0.4 }, u("s5", 3) + 2.0);
+        FT("#s5-w2", { y: 60, opacity: 0, rotation: 4 }, { y: 0, opacity: 1, rotation: 0, duration: 0.6, ease: "back.out(1.5)" }, u("s5", 3) + 2.4);
+      })();
+
+      /* ---------- S6 interpretation ---------- */
+      (function () {
+        var T = S.s6.start, D = S.s6.dur;
+        FT("#s6-glow", { scale: 1 }, { scale: 1.3, duration: D, ease: "sine.inOut" }, T);
+        FT("#s6-ghost", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1.5, ease: "power1.out" }, T + 0.4);
+        FT("#s6-t1", { scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.7, ease: "expo.out", transformOrigin: "left center" }, u("s6", 0) + 1.2);
+        FT("#s6-t1e", { x: -30, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power2.out" }, u("s6", 0) + 1.6);
+        FT("#s6-f1", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, u("s6", 1));
+        FT("#s6-a1", { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, u("s6", 1) + 0.5);
+        FT("#s6-f2", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, u("s6", 2));
+        FT("#s6-a2", { x: -20, opacity: 0 }, { x: 0, opacity: 1, duration: 0.4, ease: "power2.out" }, u("s6", 2) + 0.9);
+        FT("#s6-f3", { y: 30, opacity: 0, scale: 0.9 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.6)" }, u("s6", 2) + 1.3);
+        FT("#s6-c", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, u("s6", 3) + 0.8);
+      })();
+
+      /* ---------- S7 快讯 ---------- */
+      (function () {
+        var T = S.s7.start, D = S.s7.dur;
+        FT("#s7-glow", { scale: 1 }, { scale: 1.3, duration: D, ease: "sine.inOut" }, T);
+        FT("#s7-kicker", { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.6, ease: "power3.out" }, T + 0.5);
+        var at = [u("s7", 1), u("s7", 3), u("s7", 4), u("s7", 5), u("s7", 6)];
+        ["#s7-i1", "#s7-i2", "#s7-i3", "#s7-i4", "#s7-i5"].forEach(function (id, i) {
+          FT(id, { x: 80, opacity: 0 }, { x: 0, opacity: 1, duration: 0.55, ease: "power3.out" }, at[i] - 0.1);
+        });
+      })();
+
+      /* ---------- S8 outro ---------- */
+      (function () {
+        var T = S.s8.start, D = S.s8.dur;
+        FT("#s8-rays", { rotation: 0 }, { rotation: -10, duration: D, ease: "none" }, T);
+        FT("#s8-glow", { scale: 0.9 }, { scale: 1.2, duration: D, ease: "sine.inOut" }, T);
+        FT("#s8-tag", { x: -30, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power3.out" }, T + 0.5);
+        FT("#s8-paper", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, T + 0.7);
+        FT("#s8-authors", { opacity: 0 }, { opacity: 1, duration: 0.6 }, T + 1.1);
+        FT("#s8-bye", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.7, ease: "back.out(1.4)", transformOrigin: "left center" }, u("s8", 1) - 0.1);
+        tl.to("#black", { opacity: 1, duration: 1.2, ease: "power2.in" }, TOTAL - 1.3);
+      })();
+
+      tl.set({}, {}, TOTAL);
+      window.__timelines["ai-daily"] = tl;
+    </script>
+  </body>
+</html>

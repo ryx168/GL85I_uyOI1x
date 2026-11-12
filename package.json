@@ -1,0 +1,11 @@
+{
+  "name": "ai-daily",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "python build.py",
+    "dev": "npx --yes hyperframes@0.5.1 preview",
+    "check": "npx --yes hyperframes@0.5.1 lint && npx --yes hyperframes@0.5.1 validate && npx --yes hyperframes@0.5.1 inspect",
+    "render": "npx --yes hyperframes@0.5.1 render"
+  }
+}
